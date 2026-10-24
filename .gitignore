@@ -1,0 +1,13 @@
+# 微信开发者工具本地状态（含本机路径，不应提交）
+project.private.config.json
+
+# 依赖与构建产物
+node_modules/
+miniprogram_npm/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
