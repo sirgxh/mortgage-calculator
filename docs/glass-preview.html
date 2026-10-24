@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>房贷计算器 · 毛玻璃效果预览</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    background: #0E1118;
+    font-family: -apple-system, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  .col { display: flex; flex-direction: column; align-items: center; }
+  .cap { color: #C9D1E4; font-size: 13px; margin-bottom: 12px; letter-spacing: 1px; }
+
+  /* ---------- 手机外壳 ---------- */
+  .phone {
+    width: 375px; height: 760px;
+    border-radius: 44px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 30px 70px -20px rgba(0,0,0,.7), 0 0 0 10px #1B2030, 0 0 0 11px #333A50;
+    background: linear-gradient(180deg, #EAF0FF 0%, #F2EBFF 46%, #E4F4FF 100%);
+  }
+  .bg { position: absolute; inset: 0; overflow: hidden;
+        background: linear-gradient(180deg, #EAF0FF 0%, #F2EBFF 46%, #E4F4FF 100%); }
+  .blob { position: absolute; border-radius: 50%; will-change: transform; }
+  .b1 { width:480px;height:480px;left:-190px;top:-150px;
+    background: radial-gradient(circle at 50% 50%, rgba(46,107,255,.92) 0%, rgba(46,107,255,.52) 34%, rgba(46,107,255,.16) 60%, rgba(46,107,255,0) 78%);
+    animation: driftA 22s ease-in-out infinite; }
+  .b2 { width:420px;height:420px;right:-170px;top:90px;
+    background: radial-gradient(circle at 50% 50%, rgba(168,85,247,.88) 0%, rgba(168,85,247,.48) 34%, rgba(168,85,247,.14) 62%, rgba(168,85,247,0) 80%);
+    animation: driftB 26s ease-in-out infinite; }
+  .b3 { width:400px;height:400px;left:-150px;top:380px;
+    background: radial-gradient(circle at 50% 50%, rgba(0,194,255,.82) 0%, rgba(0,194,255,.44) 34%, rgba(0,194,255,.13) 62%, rgba(0,194,255,0) 80%);
+    animation: driftA 30s ease-in-out infinite reverse; }
+  .b4 { width:360px;height:360px;right:-130px;top:470px;
+    background: radial-gradient(circle at 50% 50%, rgba(255,92,138,.78) 0%, rgba(255,92,138,.40) 34%, rgba(255,92,138,.12) 62%, rgba(255,92,138,0) 80%);
+    animation: driftB 24s ease-in-out infinite; }
+  .b5 { width:320px;height:320px;left:90px;top:250px;
+    background: radial-gradient(circle at 50% 50%, rgba(18,216,160,.58) 0%, rgba(18,216,160,.28) 36%, rgba(18,216,160,.08) 64%, rgba(18,216,160,0) 82%);
+    animation: driftC 28s ease-in-out infinite; }
+  .b6 { width:300px;height:300px;left:-90px;top:620px;
+    background: radial-gradient(circle at 50% 50%, rgba(255,159,10,.52) 0%, rgba(255,159,10,.26) 36%, rgba(255,159,10,.08) 64%, rgba(255,159,10,0) 82%);
+    animation: driftA 34s ease-in-out infinite; }
+  .b7 { width:360px;height:360px;right:-110px;top:690px;
+    background: radial-gradient(circle at 50% 50%, rgba(106,75,255,.72) 0%, rgba(106,75,255,.36) 34%, rgba(106,75,255,.10) 64%, rgba(106,75,255,0) 82%);
+    animation: driftC 25s ease-in-out infinite reverse; }
+  @keyframes driftA { 0%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(30px,-38px,0) scale(1.09)} 100%{transform:translate3d(0,0,0) scale(1)} }
+  @keyframes driftB { 0%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(-34px,30px,0) scale(1.12)} 100%{transform:translate3d(0,0,0) scale(1)} }
+  @keyframes driftC { 0%{transform:translate3d(0,0,0) scale(1.04)} 50%{transform:translate3d(26px,24px,0) scale(.94)} 100%{transform:translate3d(0,0,0) scale(1.04)} }
+
+  .streak { position:absolute; border-radius:999px; filter: blur(5px); }
+  .s1 { width:240px;height:9px;left:-50px;top:230px;transform:rotate(-28deg);
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.95) 48%, rgba(255,255,255,0) 100%); }
+  .s2 { width:200px;height:7px;right:-40px;top:470px;transform:rotate(26deg);
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 100%); }
+  .s3 { width:280px;height:11px;left:10px;top:640px;transform:rotate(-13deg);
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.7) 50%, rgba(255,255,255,0) 100%); }
+  .grain { position:absolute; inset:0; opacity:.5;
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+    background-size: 160px 160px; }
+
+  /* ---------- 玻璃卡片 ---------- */
+  .content { position: absolute; inset: 0; padding: 60px 14px 20px; overflow-y: auto; }
+  .glass {
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,.68) 0%, rgba(255,255,255,.56) 100%);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    backdrop-filter: blur(26px) saturate(180%);
+    border-radius: 26px;
+    box-shadow: 0 24px 52px -24px rgba(16,24,48,.36), 0 2px 8px -4px rgba(16,24,48,.14),
+      inset 0 0 20px rgba(255,255,255,.22);
+    overflow: hidden;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .glass::before {
+    content:""; position:absolute; inset:0; border-radius: inherit;
+    border: 1px solid rgba(255,255,255,.52);
+    border-top-color: rgba(255,255,255,.95);
+    background: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 20%);
+    z-index: 6; pointer-events: none;
+  }
+  .glass::after {
+    content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background: linear-gradient(122deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.03) 20%, rgba(255,255,255,0) 36%);
+  }
+  .inner { position: relative; z-index: 3; }
+
+  .card-title { font-size:16px; font-weight:600; color:#10131A; margin:0 0 12px; }
+  .divider { height:1px; background: rgba(16,24,40,.09); margin: 4px 0 14px; }
+  .f-label { font-size:13.5px; color:#4E5464; margin-bottom:8px; display:flex; align-items:center; }
+  .input-line {
+    display:flex; align-items:center; height:50px; padding:0 14px; border-radius:16px;
+    background: rgba(255,255,255,.46);
+    border: 1px solid rgba(255,255,255,.66);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,.6), 0 2px 8px -6px rgba(16,24,48,.4);
+  }
+  .input-line span.v { font-size:21px; font-weight:600; color:#10131A; }
+  .input-line span.u { font-size:13px; color:#6B7180; margin-left:6px; }
+  .chips { display:flex; flex-wrap:wrap; margin-top:11px; }
+  .chip {
+    min-height:34px; padding:8px 12px; margin:0 8px 8px 0; font-size:13px; color:#343949; border-radius:12px;
+    display:flex; align-items:center;
+    background: rgba(255,255,255,.42);
+    border: 1px solid rgba(255,255,255,.66);
+  }
+  .chip.on { color:#fff; font-weight:600; border-color: rgba(255,255,255,.55);
+    background: linear-gradient(135deg, rgba(107,166,255,.95) 0%, rgba(10,108,255,.92) 100%);
+    box-shadow: 0 6px 14px -6px rgba(10,108,255,.85); }
+  .seg-wrap { padding:3px; border-radius:14px; background: rgba(118,118,128,.12);
+    display:flex; margin-bottom:16px; }
+  .seg-item { flex:1; height:34px; display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:#565C6C; border-radius:11px; }
+  .seg-item.on { background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.86));
+    color:#0A6CFF; font-weight:600; box-shadow: 0 4px 12px -4px rgba(20,30,70,.26); }
+  .picker { display:flex; align-items:center; justify-content:space-between; height:46px; }
+  .picker .l { font-size:13.5px; color:#4E5464; }
+  .picker .r { font-size:15px; font-weight:600; color:#10131A; }
+  .btn {
+    height:54px; border-radius:18px; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:17px; font-weight:600; letter-spacing:2px; margin-top:18px;
+    background: linear-gradient(135deg, #4DA3FF 0%, #007AFF 52%, #0060DF 100%);
+    border: 1px solid rgba(255,255,255,.36);
+    box-shadow: 0 14px 28px -14px rgba(0,96,223,.85), inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .navbar {
+    position:absolute; left:0; right:0; top:0; height:88px; z-index:20;
+    background: rgba(255,255,255,.72);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255,255,255,.6);
+    box-shadow: 0 8px 22px -18px rgba(16,24,48,.6);
+  }
+  .navbar .t { position:absolute; left:0; right:0; top:44px; height:44px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:600; color:#10131A; }
+  .nav-back { position:absolute; left:8px; top:44px; width:44px; height:44px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:22px; background:rgba(255,255,255,.5);
+    border:1px solid rgba(255,255,255,.72); }
+  .nav-back::after { content:""; width:10px; height:10px; border-left:2px solid #10131A;
+    border-bottom:2px solid #10131A; transform:rotate(45deg) translate(2px,-2px); border-radius:1px; }
+  .capsule { position:absolute; right:7px; top:50px; width:87px; height:32px;
+    border-radius:16px; background:rgba(255,255,255,.52);
+    border:1px solid rgba(255,255,255,.8);
+    box-shadow: 0 1px 4px -2px rgba(16,24,48,.4);
+    display:flex; align-items:center; justify-content:center; gap:11px; }
+  .capsule .dots { display:flex; gap:3px; }
+  .capsule .dots i { width:3.5px; height:3.5px; border-radius:50%; background:#10131A; opacity:.8; }
+  .capsule .ring { width:13px; height:13px; border-radius:50%; border:1.6px solid #10131A; opacity:.85; }
+
+  /* 结果页样例 */
+  .hm-label { font-size:13px; color:#5F6679; }
+  .hm-row { margin-top:4px; }
+  .hm-cur { font-size:19px; font-weight:600; color:#0A6CFF; margin-right:5px; }
+  .hm-value { font-size:40px; font-weight:700; letter-spacing:-1.2px; color:#0A6CFF; }
+  .metrics { display:flex; flex-wrap:wrap; margin-top:14px; }
+  .metric { width:50%; padding:10px 0 12px; }
+  .m-label { font-size:11.5px; color:#8C93A5; display:block; margin-bottom:4px; }
+  .m-value { font-size:17px; font-weight:600; color:#10131A; }
+  .m-value.strong { color:#0A6CFF; }
+  .m-value.warn { color:#FF5A28; }
+  .m-unit { font-size:11.5px; color:#8C93A5; margin-left:4px; }
+  .rtable { border-radius:13px; overflow:hidden; border:1px solid rgba(255,255,255,.6);
+    background: rgba(255,255,255,.26);
+    -webkit-backdrop-filter: blur(18px) saturate(180%); backdrop-filter: blur(18px) saturate(180%); }
+  .rt-head { display:flex; padding:8px 10px; background: rgba(16,24,40,.06); font-size:11px; color:#5F6679; }
+  .rt-row { display:flex; padding:10px; border-top:1px solid rgba(16,24,40,.07); font-size:12.5px; color:#343949; }
+  .rt-row.cur { background: rgba(10,132,255,.14); color:#0A6CFF; font-weight:600; }
+  .c1{flex:1.1;text-align:left}.c2{flex:1.4;text-align:right}.c3{flex:1.6;text-align:right}
+  .tag { margin-left:5px; padding:1px 5px; font-size:10px; border-radius:5px; background:#007AFF; color:#fff; }
+
+  /* ---------- 导出弹层（悬浮玻璃面板，四边留空） ---------- */
+  .sheet {
+    position:absolute; left:12px; right:12px; bottom:12px; max-height:80%;
+    background: rgba(255,255,255,.72);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 30px;
+    box-shadow: 0 30px 60px -24px rgba(16,24,48,.55), inset 0 1px 0 rgba(255,255,255,.9);
+    overflow: hidden; z-index: 25;
+  }
+  .s-bar { width:38px; height:4px; border-radius:2px; background: rgba(60,70,92,.28); margin:10px auto 2px; }
+  .s-head { display:flex; align-items:center; justify-content:space-between; min-height:48px; padding:4px 18px 10px; }
+  .s-body { padding: 0 18px 14px; }
+  .s-title { font-size:17px; font-weight:600; color:#10131A; letter-spacing:-.2px; }
+  .s-close { width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+             border-radius:22px; background: rgba(118,118,128,.12); }
+  .s-close span { display:block; width:15px; height:15px; background:#343949;
+    -webkit-mask: linear-gradient(#000,#000) center/15px 1.5px no-repeat; }
+  .opt-list { border-radius:16px; overflow:hidden; background: rgba(255,255,255,.34);
+              border:1px solid rgba(255,255,255,.6); }
+  .opt { display:flex; align-items:center; justify-content:space-between; min-height:52px; padding:0 16px;
+         border-bottom:1px solid rgba(16,24,40,.09); }
+  .opt:last-child { border-bottom:none; }
+  .opt-text { font-size:17px; color:#10131A; letter-spacing:-.2px; }
+  .check { width:22px; height:22px; border-radius:11px; border:1.7px solid #A3A9B8; }
+  .check.on { background:#007AFF; border-color:#007AFF; position:relative; }
+  .check.on::after { content:""; position:absolute; left:6px; top:4.5px; width:8px; height:4px;
+    border-left:2px solid #fff; border-bottom:2px solid #fff; transform: rotate(-45deg); }
+  .s-sub { margin:18px 0 10px; font-size:13px; color:#5A6070; }
+  .rchip { min-height:38px; padding:9px 14px; margin:0 10px 10px 0; display:inline-flex; align-items:center;
+    font-size:13px; color:#343949; border-radius:12px; background: rgba(255,255,255,.5);
+    border:1px solid rgba(255,255,255,.66); }
+  .rchip.on { color:#fff; font-weight:600; border-color:rgba(255,255,255,.5);
+    background: linear-gradient(135deg, rgba(90,170,255,.95) 0%, rgba(0,96,223,.92) 100%); }
+</style>
+</head>
+<body>
+
+<div class="col">
+  <div class="cap">计算页</div>
+  <div class="phone">
+    <div class="bg">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <div class="blob b4"></div><div class="blob b5"></div><div class="blob b6"></div>
+      <div class="blob b7"></div>
+      <div class="streak s1"></div><div class="streak s2"></div><div class="streak s3"></div>
+      <div class="grain"></div>
+    </div>
+    <div class="navbar">
+      <div class="t">房贷计算器</div>
+      <div class="capsule"><span class="dots"><i></i><i></i><i></i></span><span class="ring"></span></div>
+    </div>
+    <div class="content">
+      <div class="glass">
+        <div class="inner">
+          <div class="seg-wrap">
+            <div class="seg-item on">商业贷款</div>
+            <div class="seg-item">公积金贷款</div>
+            <div class="seg-item">组合贷款</div>
+          </div>
+          <div class="f-label">贷款金额</div>
+          <div class="input-line"><span class="v">100</span><span class="u">万元</span></div>
+          <div class="chips">
+            <div class="chip on">LPR 5年以上 · 3.5%</div>
+            <div class="chip">5年以内 · 3.0%</div>
+            <div class="chip">+20BP · 3.7%</div>
+            <div class="chip">公积金 · 2.6%</div>
+          </div>
+          <div class="divider"></div>
+          <div class="picker"><span class="l">贷款年限</span><span class="r">30年（360期）</span></div>
+          <div class="picker"><span class="l">开始还贷月份</span><span class="r" style="color:#98A0B0;font-weight:400">未选择</span></div>
+        </div>
+      </div>
+      <div class="glass">
+        <div class="inner">
+          <div class="picker" style="height:36px"><span class="l">贷款利率</span><span class="r">3.50%</span></div>
+          <div class="chips">
+            <div class="chip">−0.5% · 3.0%</div>
+            <div class="chip on">当前 · 3.5%</div>
+            <div class="chip">+0.5% · 4.0%</div>
+          </div>
+        </div>
+      </div>
+      <div class="btn">计 算</div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="cap">结果页 + 导出弹层</div>
+  <div class="phone">
+    <div class="bg">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <div class="blob b4"></div><div class="blob b5"></div><div class="blob b6"></div>
+      <div class="blob b7"></div>
+      <div class="streak s1"></div><div class="streak s2"></div><div class="streak s3"></div>
+      <div class="grain"></div>
+    </div>
+    <div class="navbar">
+      <div class="nav-back"></div>
+      <div class="t">计算结果</div>
+      <div class="capsule"><span class="dots"><i></i><i></i><i></i></span><span class="ring"></span></div>
+    </div>
+    <div class="content">
+      <div class="glass">
+        <div class="inner">
+          <div class="seg-wrap">
+            <div class="seg-item on">等额本息</div>
+            <div class="seg-item">等额本金</div>
+          </div>
+          <div class="hm-label">每月月供</div>
+          <div class="hm-row"><span class="hm-cur">¥</span><span class="hm-value">4,490.45</span></div>
+          <div class="metrics">
+            <div class="metric"><span class="m-label">总利息</span><span class="m-value">616,560.88</span><span class="m-unit">元</span></div>
+            <div class="metric"><span class="m-label">本息总计</span><span class="m-value">1,616,560.88</span><span class="m-unit">元</span></div>
+            <div class="metric"><span class="m-label">贷款金额</span><span class="m-value">1,000,000</span><span class="m-unit">元</span></div>
+            <div class="metric"><span class="m-label">贷款期限</span><span class="m-value">360</span><span class="m-unit">期</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="glass">
+        <div class="inner">
+          <div class="card-title">利率浮动对比</div>
+          <div class="rtable">
+            <div class="rt-head"><span class="c1">年利率</span><span class="c2">月供</span><span class="c3">总利息</span></div>
+            <div class="rt-row"><span class="c1">3.00%</span><span class="c2">4,216.04</span><span class="c3">517,773.60</span></div>
+            <div class="rt-row cur"><span class="c1">3.50%<span class="tag">当前</span></span><span class="c2">4,490.45</span><span class="c3">616,560.88</span></div>
+            <div class="rt-row"><span class="c1">4.00%</span><span class="c2">4,774.15</span><span class="c3">718,694.12</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="glass">
+        <div class="inner">
+          <div class="card-title" style="margin:0">提前还款试算 <span style="font-size:12px;color:#868D9E;font-weight:400">展开后试算</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet">
+      <div class="s-bar"></div>
+      <div class="s-head">
+        <div class="s-title">导出图片</div>
+        <div class="s-close"><span></span></div>
+      </div>
+      <div class="s-body">
+        <div class="opt-list">
+          <div class="opt"><span class="opt-text">贷款参数</span><span class="check on"></span></div>
+          <div class="opt"><span class="opt-text">等额本息概览</span><span class="check on"></span></div>
+          <div class="opt"><span class="opt-text">等额本金概览</span><span class="check"></span></div>
+          <div class="opt"><span class="opt-text">剩余还款情况</span><span class="check"></span></div>
+          <div class="opt"><span class="opt-text">利率浮动对比</span><span class="check on"></span></div>
+        </div>
+        <div class="s-sub">每月明细</div>
+        <div>
+          <span class="rchip">不导出</span>
+          <span class="rchip on">前 12 期</span>
+          <span class="rchip">按年汇总</span>
+        </div>
+        <div class="btn" style="margin-top:14px">生成图片</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
