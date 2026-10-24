@@ -1,0 +1,57 @@
+{
+  "description": "房贷计算器 - 微信小程序",
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "coverView": true,
+    "nodeModules": false,
+    "autoAudits": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true,
+    "uploadWithSourceMap": true,
+    "compileHotReLoad": false,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "appid": "",
+  "projectname": "mortgage-calculator",
+  "miniprogramRoot": "./",
+  "simulatorType": "wechat",
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "pages/calculator/index",
+          "pathName": "pages/calculator/index",
+          "query": "",
+          "scene": null
+        }
+      ]
+    }
+  },
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
+}

@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "pages/calculator/index",
+    "pages/result/index"
+  ],
+  "window": {
+    "navigationStyle": "custom",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#EAF0FF",
+    "backgroundTextStyle": "dark",
+    "backgroundColorTop": "#EAF0FF",
+    "backgroundColorBottom": "#E4F4FF"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
