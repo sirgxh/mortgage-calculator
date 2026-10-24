@@ -1,0 +1,289 @@
+<!--pages/calculator/index.wxml-->
+<view class="page-wrapper">
+  <!-- 背景光斑 -->
+  <view class="bg-orb bg-orb--blue"></view>
+  <view class="bg-orb bg-orb--purple"></view>
+  <view class="bg-orb bg-orb--cyan"></view>
+  <view class="bg-orb bg-orb--pink"></view>
+  <view class="bg-orb bg-orb--yellow"></view>
+  <view class="bg-orb bg-orb--green"></view>
+  <view class="bg-orb bg-orb--orange"></view>
+  <view class="bg-streak"></view>
+  <view class="bg-noise"></view>
+
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav" style="padding-top: {{statusBarHeight + 12}}px; height: {{navHeight}}px;">
+    <view class="custom-nav__back">
+      <view class="custom-nav__back-icon"></view>
+    </view>
+    <view class="custom-nav__title" style="transform: translateY(calc({{titleCenterY}}px - 50%));">房贷计算器</view>
+    <view class="custom-nav__right"></view>
+  </view>
+
+  <!-- 主内容区 -->
+  <view class="content">
+    <!-- 贷款类型分段选择 -->
+    <view class="section">
+      <view class="segmented pad-h">
+        <view wx:for="{{loanTypeOptions}}" wx:key="key"
+              class="segmented__item {{loanType === item.key ? 'segmented__item--active' : ''}}"
+              data-key="{{item.key}}"
+              bindtap="onLoanTypeTap">
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 商贷金额 -->
+    <view class="section">
+      <view class="section-title">
+        {{loanType === 'fund' ? '公积金贷款金额' : '商贷金额'}}
+      </view>
+      <view class="glass-card">
+        <view class="form-row form-row--padded-bottom">
+          <view class="form-row__label">贷款金额</view>
+          <view class="stepper">
+            <view class="stepper__btn"
+                  data-field="{{loanType === 'fund' ? 'fundAmount' : 'commercialAmount'}}"
+                  data-delta="-10"
+                  bindtap="onStepAmount">−</view>
+            <view class="stepper__value"
+                  data-field="{{loanType === 'fund' ? 'fundAmount' : 'commercialAmount'}}"
+                  bindtap="onOpenAmountInput">
+              {{loanType === 'fund' ? fundAmount : commercialAmount}}
+              <text class="stepper__unit">万</text>
+            </view>
+            <view class="stepper__btn"
+                  data-field="{{loanType === 'fund' ? 'fundAmount' : 'commercialAmount'}}"
+                  data-delta="10"
+                  bindtap="onStepAmount">+</view>
+          </view>
+        </view>
+        <view class="form-row">
+          <view class="form-row__label form-row__label--secondary">微调</view>
+          <view class="stepper">
+            <view class="stepper__btn stepper__btn--sm"
+                  data-field="{{loanType === 'fund' ? 'fundAmount' : 'commercialAmount'}}"
+                  data-delta="-1"
+                  bindtap="onStepAmount">−</view>
+            <view style="width: 60rpx;"></view>
+            <view class="stepper__btn stepper__btn--sm"
+                  data-field="{{loanType === 'fund' ? 'fundAmount' : 'commercialAmount'}}"
+                  data-delta="1"
+                  bindtap="onStepAmount">+</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 商贷利率 -->
+    <view class="section" wx:if="{{loanType !== 'fund'}}">
+      <view class="section-title">商贷利率</view>
+      <view class="glass-card glass-card--pressed"
+            data-field="commercialRate"
+            bindtap="onOpenRatePicker">
+        <view class="form-row">
+          <view class="form-row__label">年利率</view>
+          <view style="flex: 1; text-align: right;">
+            <text class="form-row__value form-row__value--accent">{{commercialRate}}</text>
+            <text class="form-row__input-unit">%</text>
+          </view>
+          <view class="form-row__chevron"></view>
+        </view>
+      </view>
+      <view class="chip-row mt-md">
+        <view wx:for="{{ratePresetsCommercial}}" wx:key="value"
+              class="chip {{commercialRate === item.value ? 'chip--active' : ''}}"
+              data-field="commercialRate"
+              data-value="{{item.value}}"
+              bindtap="onRatePresetTap">
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 公积金利率（组合贷时显示） -->
+    <view class="section" wx:if="{{loanType === 'combo'}}">
+      <view class="section-title">公积金贷款</view>
+      <view class="glass-card">
+        <view class="form-row form-row--padded-bottom">
+          <view class="form-row__label">贷款金额</view>
+          <view class="stepper">
+            <view class="stepper__btn"
+                  data-field="fundAmount"
+                  data-delta="-10"
+                  bindtap="onStepAmount">−</view>
+            <view class="stepper__value"
+                  data-field="fundAmount"
+                  bindtap="onOpenAmountInput">
+              {{fundAmount}}
+              <text class="stepper__unit">万</text>
+            </view>
+            <view class="stepper__btn"
+                  data-field="fundAmount"
+                  data-delta="10"
+                  bindtap="onStepAmount">+</view>
+          </view>
+        </view>
+        <view class="form-row glass-card--pressed"
+              data-field="fundRate"
+              bindtap="onOpenRatePicker">
+          <view class="form-row__label">年利率</view>
+          <view style="flex: 1; text-align: right;">
+            <text class="form-row__value form-row__value--accent">{{fundRate}}</text>
+            <text class="form-row__input-unit">%</text>
+          </view>
+          <view class="form-row__chevron"></view>
+        </view>
+      </view>
+      <view class="chip-row mt-md">
+        <view wx:for="{{ratePresetsFund}}" wx:key="value"
+              class="chip {{fundRate === item.value ? 'chip--active' : ''}}"
+              data-field="fundRate"
+              data-value="{{item.value}}"
+              bindtap="onRatePresetTap">
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 公积金贷款金额 + 利率（纯公积金时） -->
+    <view class="section" wx:if="{{loanType === 'fund'}}">
+      <view class="section-title">公积金利率</view>
+      <view class="glass-card glass-card--pressed"
+            data-field="fundRate"
+            bindtap="onOpenRatePicker">
+        <view class="form-row">
+          <view class="form-row__label">年利率</view>
+          <view style="flex: 1; text-align: right;">
+            <text class="form-row__value form-row__value--accent">{{fundRate}}</text>
+            <text class="form-row__input-unit">%</text>
+          </view>
+          <view class="form-row__chevron"></view>
+        </view>
+      </view>
+      <view class="chip-row mt-md">
+        <view wx:for="{{ratePresetsFund}}" wx:key="value"
+              class="chip {{fundRate === item.value ? 'chip--active' : ''}}"
+              data-field="fundRate"
+              data-value="{{item.value}}"
+              bindtap="onRatePresetTap">
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 贷款年限 -->
+    <view class="section">
+      <view class="section-title">贷款年限</view>
+      <view class="glass-card glass-card--pressed" bindtap="onOpenYearPicker">
+        <view class="form-row">
+          <view class="form-row__label">贷款期限</view>
+          <view class="form-row__value form-row__value--accent">{{years}}年（{{years * 12}}期）</view>
+          <view class="form-row__chevron"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 开始还贷月份 -->
+    <view class="section">
+      <view class="section-title">开始还贷月份（选填）</view>
+      <view class="glass-card">
+        <picker mode="date" fields="month" value="{{startMonth}}" bindchange="onStartMonthChange">
+          <view class="form-row">
+            <view class="form-row__label">开始月份</view>
+            <view class="form-row__value {{startMonth ? 'form-row__value--accent' : 'form-row__value--secondary'}}">
+              {{startMonthDisplay}}
+            </view>
+            <view class="form-row__chevron"></view>
+          </view>
+        </picker>
+        <view wx:if="{{startMonth}}" class="form-row form-row--padded-bottom" bindtap="onClearStartMonth">
+          <view class="form-row__label"></view>
+          <view class="form-row__value text-danger" style="text-align: right;">清除</view>
+        </view>
+      </view>
+      <view class="form-row__hint pad-h mt-sm">填写后结果页将展示剩余还款期数、剩余本金与利息</view>
+    </view>
+
+    <!-- 计算按钮 -->
+    <view class="section section--lg safe-bottom">
+      <view class="btn-primary btn-primary--block" bindtap="onCalculate">开始计算</view>
+    </view>
+  </view>
+
+  <!-- 年限选择弹窗 -->
+  <view class="modal-mask" wx:if="{{showYearPicker}}" bindtap="onCloseYearPicker">
+    <view class="modal-sheet" catchtap="">
+      <view class="modal-sheet__title">选择贷款年限</view>
+      <view class="year-list">
+        <view wx:for="{{yearOptions}}" wx:key="value"
+              class="year-item {{years === item.value ? 'year-item--active' : ''}}"
+              data-value="{{item.value}}"
+              bindtap="onYearSelect">
+          {{item.label}}
+        </view>
+      </view>
+      <view class="modal-sheet__cancel" bindtap="onCloseYearPicker">取消</view>
+    </view>
+  </view>
+
+  <!-- 利率选择弹窗（商贷） -->
+  <view class="modal-mask" wx:if="{{showRatePicker}}" bindtap="onCloseRatePicker">
+    <view class="modal-sheet" catchtap="">
+      <view class="modal-sheet__title">商贷年利率</view>
+      <view class="rate-input-row">
+        <input class="rate-input" type="digit" value="{{commercialRate}}" data-field="commercialRate" bindblur="onRateInputChange" />
+        <text class="rate-unit">%</text>
+      </view>
+      <view class="modal-sheet__subtitle">常用利率</view>
+      <view class="rate-grid">
+        <view wx:for="{{ratePresetsCommercial}}" wx:key="value"
+              class="rate-chip {{commercialRate === item.value ? 'rate-chip--active' : ''}}"
+              data-field="commercialRate"
+              data-value="{{item.value}}"
+              bindtap="onRatePresetTap">
+          {{item.label}}
+        </view>
+      </view>
+      <view class="modal-sheet__cancel" bindtap="onCloseRatePicker">完成</view>
+    </view>
+  </view>
+
+  <!-- 利率选择弹窗（公积金） -->
+  <view class="modal-mask" wx:if="{{showFundRatePicker}}" bindtap="onCloseRatePicker">
+    <view class="modal-sheet" catchtap="">
+      <view class="modal-sheet__title">公积金年利率</view>
+      <view class="rate-input-row">
+        <input class="rate-input" type="digit" value="{{fundRate}}" data-field="fundRate" bindblur="onRateInputChange" />
+        <text class="rate-unit">%</text>
+      </view>
+      <view class="modal-sheet__subtitle">常用利率</view>
+      <view class="rate-grid">
+        <view wx:for="{{ratePresetsFund}}" wx:key="value"
+              class="rate-chip {{fundRate === item.value ? 'rate-chip--active' : ''}}"
+              data-field="fundRate"
+              data-value="{{item.value}}"
+              bindtap="onRatePresetTap">
+          {{item.label}}
+        </view>
+      </view>
+      <view class="modal-sheet__cancel" bindtap="onCloseRatePicker">完成</view>
+    </view>
+  </view>
+
+  <!-- 金额输入弹窗 -->
+  <view class="modal-mask" wx:if="{{showAmountInput}}" bindtap="onAmountInputCancel">
+    <view class="modal-sheet modal-sheet--sm" catchtap="">
+      <view class="modal-sheet__title">输入贷款金额</view>
+      <view class="amount-input-wrap">
+        <input class="amount-input" type="digit" value="{{amountInputValue}}" bindinput="onAmountInputChange" focus="{{showAmountInput}}" />
+        <text class="amount-unit">万元</text>
+      </view>
+      <view class="amount-actions">
+        <view class="btn-ghost" style="flex: 1;" bindtap="onAmountInputCancel">取消</view>
+        <view class="btn-primary" style="flex: 2;" bindtap="onAmountInputConfirm">确定</view>
+      </view>
+    </view>
+  </view>
+</view>
