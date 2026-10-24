@@ -1,0 +1,390 @@
+<!--pages/result/index.wxml-->
+<view class="page-wrapper">
+  <!-- 背景光斑 -->
+  <view class="bg-orb bg-orb--blue"></view>
+  <view class="bg-orb bg-orb--purple"></view>
+  <view class="bg-orb bg-orb--cyan"></view>
+  <view class="bg-orb bg-orb--pink"></view>
+  <view class="bg-orb bg-orb--yellow"></view>
+  <view class="bg-orb bg-orb--green"></view>
+  <view class="bg-orb bg-orb--orange"></view>
+  <view class="bg-streak"></view>
+  <view class="bg-noise"></view>
+
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav" style="padding-top: {{statusBarHeight + 12}}px; height: {{navHeight}}px;">
+    <view class="custom-nav__back" bindtap="onBack">
+      <view class="custom-nav__back-icon"></view>
+    </view>
+    <view class="custom-nav__title" style="transform: translateY(calc({{titleCenterY}}px - 50%));">计算结果</view>
+    <view class="custom-nav__right"></view>
+  </view>
+
+  <view class="content">
+    <!-- 顶部概览卡片 -->
+    <view class="section">
+      <view class="glass-card overview-card">
+        <view class="overview-card__header">
+          <view class="overview-card__label">
+            {{activeTab === 'equalInstallment' ? '等额本息 · 月供' : '等额本金 · 首月月供'}}
+          </view>
+          <view class="overview-card__badge" bindtap="onCopySummary">
+            <text class="overview-card__badge-icon">⎘</text>
+            <text>复制</text>
+          </view>
+        </view>
+        <view class="overview-card__amount">
+          <text class="num">{{activeTab === 'equalInstallment' ? result.equalInstallment.monthlyPayment.toFixed(2) : result.equalPrincipal.firstMonthPayment.toFixed(2)}}</text>
+          <text class="overview-card__unit">元</text>
+        </view>
+        <view class="overview-card__sub" wx:if="{{activeTab === 'equalPrincipal'}}">
+          每月递减 <text class="num text-accent">{{result.equalPrincipal.monthlyDecrease.toFixed(2)}}</text> 元 · 末月 {{result.equalPrincipal.lastMonthPayment.toFixed(2)}} 元
+        </view>
+        <view class="overview-card__sub" wx:else>
+          每月固定还款，利息占比逐月减少
+        </view>
+      </view>
+    </view>
+
+    <!-- Tab 切换 -->
+    <view class="section">
+      <view class="tab-bar">
+        <view class="tab-bar__item {{activeTab === 'equalInstallment' ? 'tab-bar__item--active' : ''}}"
+              data-tab="equalInstallment"
+              bindtap="onTabTap">
+          等额本息
+        </view>
+        <view class="tab-bar__item {{activeTab === 'equalPrincipal' ? 'tab-bar__item--active' : ''}}"
+              data-tab="equalPrincipal"
+              bindtap="onTabTap">
+          等额本金
+        </view>
+      </view>
+    </view>
+
+    <!-- 核心数据 -->
+    <view class="section">
+      <view class="section-title">核心数据</view>
+      <view class="glass-card">
+        <view class="data-row">
+          <view class="data-row__key">总利息</view>
+          <view class="data-row__value">
+            {{activeTab === 'equalInstallment' ? result.equalInstallment.totalInterest.toFixed(2) : result.equalPrincipal.totalInterest.toFixed(2)}} 元
+          </view>
+        </view>
+        <view class="data-row">
+          <view class="data-row__key">本息总计</view>
+          <view class="data-row__value data-row__value--accent">
+            {{activeTab === 'equalInstallment' ? result.equalInstallment.totalPayment.toFixed(2) : result.equalPrincipal.totalPayment.toFixed(2)}} 元
+          </view>
+        </view>
+        <view class="data-row">
+          <view class="data-row__key">贷款金额</view>
+          <view class="data-row__value">{{result.totalPrincipal.toFixed(2)}} 元</view>
+        </view>
+        <view class="data-row">
+          <view class="data-row__key">贷款期限</view>
+          <view class="data-row__value">{{params.years}} 年（{{params.years * 12}} 期）</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 两方式利息差 -->
+    <view class="section">
+      <view class="glass-card compare-card">
+        <view class="compare-card__label">两种方式利息差额</view>
+        <view class="compare-card__value">
+          <text class="num text-success">{{result.interestDiff.toFixed(2)}}</text>
+          <text class="compare-card__unit">元</text>
+        </view>\n        <view class="compare-card__desc">等额本金比等额本息少付 {{result.interestDiff.toFixed(2)}} 元利息</view>
+      </view>
+    </view>
+
+    <!-- 剩余还款（有开始月份时） -->
+    <view class="section" wx:if="{{(activeTab === 'equalInstallment' && result.equalInstallment.remaining) || (activeTab === 'equalPrincipal' && result.equalPrincipal.remaining)}}">
+      <view class="section-title">剩余还款情况</view>
+      <view class="glass-card">
+        <view class="data-row">
+          <view class="data-row__key">已还期数</view>
+          <view class="data-row__value">
+            {{activeTab === 'equalInstallment' ? result.equalInstallment.remaining.paidPeriods : result.equalPrincipal.remaining.paidPeriods}} 期
+          </view>
+        </view>
+        <view class="data-row">
+          <view class="data-row__key">剩余期数</view>
+          <view class="data-row__value">
+            {{activeTab === 'equalInstallment' ? result.equalInstallment.remaining.remainingPeriods : result.equalPrincipal.remaining.remainingPeriods}} 期
+          </view>
+        </view>
+        <view class="data-row">
+          <view class="data-row__key">剩余本金</view>
+          <view class="data-row__value data-row__value--accent">
+            {{activeTab === 'equalInstallment' ? result.equalInstallment.remaining.remainingPrincipal.toFixed(2) : result.equalPrincipal.remaining.remainingPrincipal.toFixed(2)}} 元
+          </view>
+        </view>
+        <view class="data-row">
+          <view class="data-row__key">剩余利息</view>
+          <view class="data-row__value">
+            {{activeTab === 'equalInstallment' ? result.equalInstallment.remaining.remainingInterest.toFixed(2) : result.equalPrincipal.remaining.remainingInterest.toFixed(2)}} 元
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 利率浮动对比 -->
+    <view class="section" wx:if="{{showRateCompare && result.rateScenarios}}">
+      <view class="section-title">利率浮动对比</view>
+      <view class="glass-card">
+        <view class="rate-compare-header">
+          <view class="rate-compare-header__col">利率</view>
+          <view class="rate-compare-header__col">{{activeTab === 'equalInstallment' ? '月供' : '首月月供'}}</view>
+          <view class="rate-compare-header__col">总利息</view>
+        </view>
+        <block wx:for="{{result.rateScenarios}}" wx:key="delta">
+          <view class="rate-compare-row {{item.isCurrent ? 'rate-compare-row--current' : ''}}">
+            <view class="rate-compare-row__col">
+              <text class="rate-delta" wx:if="{{item.delta > 0}}">+{{item.delta}}%</text>
+              <text class="rate-delta" wx:elif="{{item.delta < 0}}">{{item.delta}}%</text>
+              <text class="rate-delta rate-delta--current" wx:else>当前</text>
+              <text class="rate-value">{{item.rate.toFixed(2)}}%</text>
+            </view>
+            <view class="rate-compare-row__col num">
+              {{activeTab === 'equalInstallment' ? item.equalInstallment.monthlyPayment.toFixed(2) : item.equalPrincipal.firstMonthPayment.toFixed(2)}}
+            </view>
+            <view class="rate-compare-row__col num">
+              {{activeTab === 'equalInstallment' ? item.equalInstallment.totalInterest.toFixed(0) : item.equalPrincipal.totalInterest.toFixed(0)}}
+            </view>
+          </view>
+        </block>
+      </view>
+      <view class="form-row__hint pad-h mt-sm">仅商贷部分随 LPR 浮动，公积金利率保持不变</view>
+    </view>
+
+    <!-- 提前还款试算 -->
+    <view class="section">
+      <view class="section-title">提前还款试算</view>
+      <view class="glass-card">
+        <view class="form-row prepay-toggle-row" bindtap="onTogglePrepay">
+          <view class="form-row__label">展开提前还款试算</view>
+          <view class="disclosure-indicator {{showPrepay ? 'disclosure-indicator--open' : ''}}"></view>
+        </view>
+
+        <block wx:if="{{showPrepay}}">
+          <view class="prepay-form">
+            <view class="prepay-form__row">
+              <view class="prepay-form__label">提前还款金额</view>
+              <view class="prepay-form__input-wrap">
+                <input class="prepay-form__input" type="digit" value="{{prepayAmount}}" bindinput="onPrepayAmountInput" />
+                <text class="prepay-form__unit">万元</text>
+              </view>
+            </view>
+            <view class="prepay-form__row">
+              <view class="prepay-form__label">第几期后还</view>
+              <view class="prepay-form__input-wrap">
+                <input class="prepay-form__input" type="number" value="{{prepayAfterPeriod}}" bindinput="onPrepayPeriodInput" />
+                <text class="prepay-form__unit">期</text>
+              </view>
+            </view>
+            <view class="prepay-strategy">
+              <view class="prepay-strategy__item {{prepayStrategy === 'shorten' ? 'prepay-strategy__item--active' : ''}}"
+                    data-strategy="shorten"
+                    bindtap="onPrepayStrategyChange">
+                <view class="prepay-strategy__title">缩短期限</view>
+                <view class="prepay-strategy__desc">月供不变，少还几年</view>
+              </view>
+              <view class="prepay-strategy__item {{prepayStrategy === 'reduce' ? 'prepay-strategy__item--active' : ''}}"
+                    data-strategy="reduce"
+                    bindtap="onPrepayStrategyChange">
+                <view class="prepay-strategy__title">减少月供</view>
+                <view class="prepay-strategy__desc">期限不变，每月少还</view>
+              </view>
+            </view>
+          </view>
+
+          <view wx:if="{{prepayResult}}" class="prepay-result">
+            <view class="prepay-result__saved">
+              <view class="prepay-result__saved-label">可节省利息</view>
+              <view class="prepay-result__saved-value num text-success">
+                {{prepayResult.savedInterest.toFixed(2)}} 元
+              </view>
+            </view>
+            <view class="data-row">
+              <view class="data-row__key">还款前剩余本金</view>
+              <view class="data-row__value num">{{prepayResult.remainingPrincipalBefore.toFixed(2)}} 元</view>
+            </view>
+            <view class="data-row">
+              <view class="data-row__key">还款后剩余本金</view>
+              <view class="data-row__value data-row__value--accent num">{{prepayResult.remainingPrincipalAfter.toFixed(2)}} 元</view>
+            </view>
+            <block wx:if="{{prepayStrategy === 'shorten'}}">
+              <view class="data-row">
+                <view class="data-row__key">原剩余期数</view>
+                <view class="data-row__value">{{prepayResult.originalRemainingPeriods}} 期</view>
+              </view>
+              <view class="data-row">
+                <view class="data-row__key">新剩余期数</view>
+                <view class="data-row__value data-row__value--success">{{prepayResult.newRemainingPeriods}} 期（缩短 {{prepayResult.originalRemainingPeriods - prepayResult.newRemainingPeriods}} 期）</view>
+              </view>
+            </block>
+            <block wx:else>
+              <view class="data-row">
+                <view class="data-row__key">原月供</view>
+                <view class="data-row__value num">{{prepayResult.originalMonthlyPayment.toFixed(2)}} 元</view>
+              </view>
+              <view class="data-row">
+                <view class="data-row__key">新月供</view>
+                <view class="data-row__value data-row__value--success num">{{prepayResult.newMonthlyPayment.toFixed(2)}} 元（减少 {{(prepayResult.originalMonthlyPayment - prepayResult.newMonthlyPayment).toFixed(2)}} 元）</view>
+              </view>
+            </block>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 还款明细 -->
+    <view class="section section--lg">
+      <view class="section-title">
+        还款明细
+        <text class="section-title__count">（共 {{params.years * 12}} 期）</text>
+      </view>
+
+      <!-- 明细模式切换 -->
+      <view class="detail-mode-bar">
+        <view wx:for="{{detailModeOptions}}" wx:key="value"
+              class="detail-mode-bar__item {{detailMode === item.value ? 'detail-mode-bar__item--active' : ''}}"
+              data-value="{{item.value}}"
+              bindtap="onDetailModeChange">
+          {{item.label}}
+        </view>
+      </view>
+
+      <view class="glass-card detail-card">
+        <view class="detail-table">
+          <view class="detail-table__head">
+            <view class="detail-table__th">期数</view>
+            <view class="detail-table__th">月供(元)</view>
+            <view class="detail-table__th">本金(元)</view>
+            <view class="detail-table__th">利息(元)</view>
+            <view class="detail-table__th">剩余本金(元)</view>
+          </view>
+
+          <!-- 按年分组折叠（all / firstN 模式下） -->
+          <block wx:if="{{detailMode === 'all' || detailMode === 'first12' || detailMode === 'first36' || detailMode === 'first60'}}">
+            <block wx:for="{{activeTab === 'equalInstallment' ? result.equalInstallment.schedule : result.equalPrincipal.schedule}}" wx:for-item="year" wx:for-index="yearIdx" wx:key="year">
+              <view wx:if="{{detailMode === 'all' || yearIdx < (detailMode === 'first12' ? 1 : detailMode === 'first36' ? 3 : 5)}}"
+                    class="detail-year-row"
+                    data-year="{{yearIdx}}"
+                    bindtap="onToggleYear">
+                <view class="detail-year-row__td">
+                  <text>第 {{yearIdx + 1}} 年</text>
+                  <text class="detail-year-row__count">{{year.length}} 期</text>
+                  <view class="disclosure-indicator {{expandedYears[yearIdx] ? 'disclosure-indicator--open' : ''}}" style="float: right; margin-top: 4rpx;"></view>
+                </view>
+              </view>
+              <block wx:if="{{expandedYears[yearIdx]}}">
+                <view wx:for="{{year}}" wx:for-item="item" wx:for-index="idx" wx:key="period" class="detail-table__row">
+                  <view class="detail-table__td">{{item.period}}</view>
+                  <view class="detail-table__td num">{{item.payment.toFixed(2)}}</view>
+                  <view class="detail-table__td num">{{item.principal.toFixed(2)}}</view>
+                  <view class="detail-table__td num">{{item.interest.toFixed(2)}}</view>
+                  <view class="detail-table__td detail-table__td--muted num">{{item.remainingPrincipal.toFixed(2)}}</view>
+                </view>
+              </block>
+            </block>
+          </block>
+
+          <!-- 按年汇总模式 -->
+          <block wx:if="{{detailMode === 'yearly'}}">
+            <view wx:for="{{activeTab === 'equalInstallment' ? result.equalInstallment.yearlySummary : result.equalPrincipal.yearlySummary}}" wx:for-item="year" wx:key="year" class="detail-table__row">
+              <view class="detail-table__td">{{item.year + 1}}</view>
+              <view class="detail-table__td num">{{item.totalPayment.toFixed(2)}}</view>
+              <view class="detail-table__td num">{{item.totalPrincipal.toFixed(2)}}</view>
+              <view class="detail-table__td num">{{item.totalInterest.toFixed(2)}}</view>
+              <view class="detail-table__td detail-table__td--muted num">{{item.remainingPrincipal.toFixed(2)}}</view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作栏 -->
+    <view class="bottom-bar safe-bottom">
+      <view class="btn-ghost" style="flex: 1;" bindtap="onCopySummary">复制结果</view>
+      <view class="btn-primary" style="flex: 2;" bindtap="onOpenExportSheet">导出长图</view>
+    </view>
+  </view>
+
+  <!-- 导出选择弹窗 -->
+  <view class="modal-mask" wx:if="{{showExportSheet}}" bindtap="onCloseExportSheet">
+    <view class="modal-sheet" catchtap="">
+      <view class="modal-sheet__title">导出图片内容</view>
+
+      <view class="export-option" bindtap="onToggleExportOption" data-key="params">
+        <view class="export-option__label">贷款参数</view>
+        <view class="toggle {{exportOptions.params ? 'toggle--on' : ''}}">
+          <view class="toggle__thumb"></view>
+        </view>
+      </view>
+
+      <view class="export-option" bindtap="onToggleExportOption" data-key="overview">
+        <view class="export-option__label">还款概览（{{activeTab === 'equalInstallment' ? '等额本息' : '等额本金'}}）</view>
+        <view class="toggle {{exportOptions.overview ? 'toggle--on' : ''}}">
+          <view class="toggle__thumb"></view>
+        </view>
+      </view>
+
+      <view class="export-option" wx:if="{{(activeTab === 'equalInstallment' && result.equalInstallment.remaining) || (activeTab === 'equalPrincipal' && result.equalPrincipal.remaining)}}" bindtap="onToggleExportOption" data-key="remaining">
+        <view class="export-option__label">剩余还款情况</view>
+        <view class="toggle {{exportOptions.remaining ? 'toggle--on' : ''}}">
+          <view class="toggle__thumb"></view>
+        </view>
+      </view>
+
+      <view class="export-option" wx:if="{{showRateCompare && result.rateScenarios}}" bindtap="onToggleExportOption" data-key="rateCompare">
+        <view class="export-option__label">利率浮动对比</view>
+        <view class="toggle {{exportOptions.rateCompare ? 'toggle--on' : ''}}">
+          <view class="toggle__thumb"></view>
+        </view>
+      </view>
+
+      <view class="export-option" wx:if="{{showPrepay && prepayResult}}" bindtap="onToggleExportOption" data-key="prepay">
+        <view class="export-option__label">提前还款试算</view>
+        <view class="toggle {{exportOptions.prepay ? 'toggle--on' : ''}}">
+          <view class="toggle__thumb"></view>
+        </view>
+      </view>
+
+      <view class="export-detail-section">
+        <view class="export-detail-title">还款明细</view>
+        <view class="export-detail-options">
+          <view wx:for="{{detailExportOptions}}" wx:key="value"
+                class="export-detail-chip {{exportOptions.detail === item.value ? 'export-detail-chip--active' : ''}}"
+                data-value="{{item.value}}"
+                bindtap="onExportDetailChange">
+            {{item.label}}
+          </view>
+        </view>
+      </view>
+
+      <view class="btn-primary btn-primary--block" style="margin-top: 32rpx;" bindtap="onGeneratePoster">
+        {{isGenerating ? '生成中...' : '生成图片'}}
+      </view>
+
+      <view class="modal-sheet__cancel" bindtap="onCloseExportSheet">取消</view>
+    </view>
+  </view>
+
+  <!-- 图片预览弹窗 -->
+  <view class="poster-preview-mask" wx:if="{{showPosterPreview}}" bindtap="onClosePosterPreview">
+    <view class="poster-preview" catchtap="">
+      <image class="poster-preview__img" src="{{posterImagePath}}" mode="widthFix" show-menu-by-longpress="true" />
+      <view class="poster-preview__actions">
+        <view class="btn-ghost" style="flex: 1;" bindtap="onClosePosterPreview">关闭</view>
+        <view class="btn-primary" style="flex: 2;" bindtap="onSavePoster">保存到相册</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 离屏 canvas（用于绘制海报） -->
+  <canvas type="2d" id="posterCanvas" class="offscreen-canvas"></canvas>
+</view>
